@@ -1,20 +1,19 @@
 declare global {
-    interface ITodoItem {
-        id: string;
+    // Define type alias; available via `realm-web`
+    type MongoDocument = globalThis.Realm.Services.MongoDB.Document;
+
+    interface ICheckItem extends MongoDocument {
         checked: boolean;
         content: string;
         comment?: string;
-    }
-
-    interface ICheckItem extends ITodoItem {
         shouldBe: string;
     }
 
-    interface ICheckList {
-        id: string;
-        title: string;
+    interface ICheckList extends MongoDocument {
+        name: string;
+        description?: string;
         items: ICheckItem[];
     }
 }
 
-export { };
+export {};

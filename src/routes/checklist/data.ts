@@ -1,15 +1,15 @@
 import { browser } from "$app/environment";
 
 const emptyItem: ICheckItem = {
-    id: "",
+    _id: "",
     content: "",
     checked: false,
     shouldBe: "",
     comment: "",
 };
 const emptyList: ICheckList = {
-    id: "",
-    title: "",
+    _id: "",
+    name: "",
     items: [],
 };
 
@@ -37,7 +37,7 @@ export function loadSingleCheckList(id: string): ICheckList {
         const key = _getCheckListStorageKey(id);
         const listStr = window.localStorage.getItem(key);
         const list = listStr ? (JSON.parse(listStr) as ICheckList) : { ...emptyList };
-        list.id = id;
+        list._id = id;
         return list;
     } else {
         return emptyList;
@@ -46,12 +46,12 @@ export function loadSingleCheckList(id: string): ICheckList {
 
 export function saveSingleCheckList(list: ICheckList): void {
     if (browser) {
-        const key = _getCheckListStorageKey(list.id);
+        const key = _getCheckListStorageKey(list._id);
         window.localStorage.setItem(key, JSON.stringify(list));
 
         const ids = loadCheckListIds();
-        if (!ids.includes(list.id)) {
-            ids.push(list.id);
+        if (!ids.includes(list._id)) {
+            ids.push(list._id);
             saveCheckListIds(ids);
         }
     }
