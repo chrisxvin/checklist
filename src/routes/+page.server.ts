@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
     if (lists) {
         return {
-            lists: toPOJO(lists),
+            lists: toPOJO<ICheckList>(lists),
         };
     }
 

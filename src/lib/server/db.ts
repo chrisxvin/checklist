@@ -1,4 +1,3 @@
-import { MongoClient } from "mongodb";
 import * as Realm from "realm-web";
 import * as env from "$env/static/private";
 
