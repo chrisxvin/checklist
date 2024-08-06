@@ -9,11 +9,12 @@ const credentials = Realm.Credentials.apiKey(env.MONGO_ATLAS_API_KEY);
 
 // Authenticate the user
 const user = await app.logIn(credentials);
-// `App.currentUser` updates to match the logged in user
-console.assert(user.id === app.currentUser?.id);
-const client = user.mongoClient("mongodb-atlas");
-const db = client.db("things");
 
-export {
-    db,
-};
+// export remote functions caller
+export const atlasFuncs = user.functions as IAtlasFunctions;
+
+// `App.currentUser` updates to match the logged in user
+// console.assert(user.id === app.currentUser?.id);
+
+// const client = user.mongoClient("mongodb-atlas");
+// const db = client.db("things");

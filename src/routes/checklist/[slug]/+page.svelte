@@ -1,7 +1,7 @@
 <script lang="ts">
-import { page } from "$app/stores";
 import type { PageData } from "./$types";
-// import { loadSingleCheckList, saveSingleCheckList } from "../data";
+
+import { page } from "$app/stores";
 
 interface IProps {
     data: PageData;
@@ -9,11 +9,15 @@ interface IProps {
 let { data }: IProps = $props();
 
 const editUrl = $page.url + "/edit";
-// const checklist = loadSingleCheckList($page.params.slug);
 </script>
 
+<svelte:head>
+    <title>{data.name} - Checklist</title>
+</svelte:head>
+
+<p><a href={editUrl}>Edit</a></p>
+
 <h1>{data.name}</h1>
-<a href={editUrl}>Edit</a>
 
 <p>{data.description}</p>
 <ul>

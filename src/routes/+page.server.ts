@@ -1,17 +1,16 @@
 import type { PageServerLoad } from "./$types";
 
 import { error } from "@sveltejs/kit";
-import { db } from "$lib/server/db";
-import { toPOJO } from "$lib/utils/mongo";
+import { atlasFuncs } from "$lib/server/db";
 
 export const load: PageServerLoad = async ({ params }) => {
-    const lists = await db.collection<ICheckList>("checklist").find();
+    const resp = await atlasFuncs.getLists();
 
-    if (lists) {
+    if (resp && resp.result === 200) {
         return {
-            lists: toPOJO<ICheckList>(lists),
+            lists: resp.data,
         };
     }
 
-    error(404, "Not found");
+    error(resp.result);
 };

@@ -1,11 +1,15 @@
 <script lang="ts">
-import { loadSingleCheckList, saveSingleCheckList } from "../../data";
+import type { PageData } from "./$types";
+
 import { page } from "$app/stores";
 
-const checklist = loadSingleCheckList($page.params.slug);
-const items = $state(checklist.items);
+interface IProps {
+    data: PageData;
+}
+let { data }: IProps = $props();
+
+const list = $state(data);
 const newItem: ICheckItem = {
-    id: "",
     content: "",
     checked: false,
     shouldBe: "",
@@ -13,11 +17,11 @@ const newItem: ICheckItem = {
 };
 
 function addItem() {
-    items.push({ ...newItem });
+    list.items.push({ ...newItem });
 }
 
 function save() {
-    saveSingleCheckList(checklist);
+    // saveSingleCheckList(list);
 }
 
 function close() {
@@ -25,9 +29,12 @@ function close() {
 }
 </script>
 
+<input type="text" placeholder="Name" class="input input-bordered input-sm col-span-2 w-full" bind:value={list.name} />
+<input type="text" placeholder="Description" class="input input-bordered input-sm w-full" bind:value={list.description} />
+
 <div>
     <ul>
-        {#each items as item}
+        {#each list.items as item}
             <li class="grid grid-cols-3 gap-2 border p-2 md:grid-cols-6">
                 <input type="text" placeholder="New item..." class="input input-sm col-span-2 w-full" bind:value={item.content} />
                 <input type="text" placeholder="Target state" class="input input-sm w-full" bind:value={item.shouldBe} />
