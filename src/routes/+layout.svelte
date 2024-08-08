@@ -8,35 +8,39 @@ let { children } = $props();
 <div class="app">
     <Header />
 
-    <main>
+    <main class="main">
         <!-- <slot /> -->
         {@render children()}
     </main>
 
-    <footer>
+    <!--
+    <footer class="footer">
         <p>Hello there!</p>
     </footer>
+    -->
 </div>
 
 <style>
 .app {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    @apply min-h-screen flex flex-col justify-between;
 }
 
-main {
+.main {
+    @apply mb-auto px-4;
+
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    /* padding: 1rem; */
     width: 100%;
     max-width: 64rem;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-footer {
+.footer {
+    /* @apply sticky bottom-0 bg-secondary-100; */
+
     display: flex;
     flex-direction: column;
     justify-content: center;
