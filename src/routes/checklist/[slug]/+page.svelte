@@ -9,6 +9,19 @@ interface IProps {
 let { data }: IProps = $props();
 
 const editUrl = $page.url + "/edit";
+let stepIndex = $state(-1);
+
+function doStart() {
+    stepIndex = 0;
+}
+
+function doNext() {
+    stepIndex++;
+}
+
+function doDone() {
+    stepIndex = -1;
+}
 </script>
 
 <svelte:head>
@@ -29,8 +42,8 @@ const editUrl = $page.url + "/edit";
 <p>{data.description}</p>
 
 <ul class="flex-1">
-    {#each data.items as item}
-        <li>
+    {#each data.items as item, i}
+        <li class:active-step={i === stepIndex}>
             <div class="form-control">
                 <label class="label cursor-pointer">
                     <input type="checkbox" checked={item.checked} class="checkbox-primary checkbox" />
@@ -46,9 +59,9 @@ const editUrl = $page.url + "/edit";
 </ul>
 
 <div class="flex flex-row gap-2 sticky bottom-0">
-    <button class="btn btn-primary">Start</button>
-    <button class="btn btn-info flex-1">Next</button>
-    <button class="btn">Done</button>
+    <button class="btn btn-primary" onclick={doStart}>Start</button>
+    <button class="btn btn-info flex-1" onclick={doNext}>Next</button>
+    <button class="btn" onclick={doDone}>Done</button>
 </div>
 
 <style>
@@ -56,5 +69,9 @@ const editUrl = $page.url + "/edit";
     --border-color: theme(colors.neutral);
     border-color: color-mix(in oklch, var(--border-color) 50%, var(--border-color) 50%);
     height: calc(1lh - 4px);
+}
+
+.active-step {
+    @apply bg-info-200 rounded-md;
 }
 </style>
