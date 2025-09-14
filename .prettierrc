@@ -8,11 +8,12 @@
     "useTabs": false,
     "tabWidth": 4,
     "singleQuote": false,
+    "singleAttributePerLine": false,
     "trailingComma": "all",
     "printWidth": 150,
     "plugins": [
-        "prettier-plugin-multiline-arrays",
         "prettier-plugin-svelte",
+        "prettier-plugin-multiline-arrays",
         "prettier-plugin-tailwindcss"
     ],
     "overrides": [
@@ -22,5 +23,6 @@
                 "parser": "svelte"
             }
         }
-    ]
+    ],
+    "tailwindStylesheet": "./src/app.css"
 }
