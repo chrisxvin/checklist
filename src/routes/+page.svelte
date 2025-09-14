@@ -15,7 +15,7 @@ let { data }: IProps = $props();
 <section>
     <h1>Checklist</h1>
     <ul>
-        {#each data.lists as list}
+        {#each data.list as list}
             <li><a href={`/checklist/${list._id}/`}>{list.name}</a></li>
         {/each}
     </ul>

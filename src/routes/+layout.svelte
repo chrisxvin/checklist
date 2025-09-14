@@ -1,7 +1,10 @@
+<script module>
+import "../app.css";
+</script>
+
 <script>
 import Header from "./Header.svelte";
 import Footer from "./Footer.svelte";
-import "../app.css";
 
 let { children } = $props();
 </script>
@@ -26,7 +29,7 @@ let { children } = $props();
 }
 
 .main {
-    @apply mb-auto px-4;
+    @apply mb-auto px-4 contain-size;
 
     flex: 1;
     display: flex;
@@ -37,5 +40,4 @@ let { children } = $props();
     margin: 0 auto;
     box-sizing: border-box;
 }
-
 </style>
