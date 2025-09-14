@@ -1,5 +1,3 @@
-@import "@mdi/font/css/materialdesignicons.min.css";
-
 @import "tailwindcss";
 
 @plugin "daisyui" {

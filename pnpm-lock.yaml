@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@mdi/font':
-        specifier: ^7.4.47
-        version: 7.4.47
       arctic:
         specifier: ^3.7.0
         version: 3.7.0
@@ -725,9 +722,6 @@ packages:
   '@jsbits/get-package-version@1.0.3':
     resolution: {integrity: sha512-IJy1jRL01x7p6UEpgKa1lVLstMUx8EiIR8pPoS5sBfsHEoeLkzYiNpAfxPx8zLDUJyS1yBbChJjcWdPqyH285w==}
     engines: {node: '>=4.2'}
-
-  '@mdi/font@7.4.47':
-    resolution: {integrity: sha512-43MtGpd585SNzHZPcYowu/84Vz2a2g31TvPMTm9uTiCSWzaheQySUcSyUH/46fPnuPQWof2yd0pGBtzee/IQWw==}
 
   '@mongodb-js/saslprep@1.3.0':
     resolution: {integrity: sha512-zlayKCsIjYb7/IdfqxorK5+xUMyi4vOKcFy10wKJYc63NSdKI8mNME+uJqfatkPmOSMMUiojrL58IePKBm3gvQ==}
@@ -2923,8 +2917,6 @@ snapshots:
   '@jsbits/escape-regex-str@1.0.3': {}
 
   '@jsbits/get-package-version@1.0.3': {}
-
-  '@mdi/font@7.4.47': {}
 
   '@mongodb-js/saslprep@1.3.0':
     dependencies:

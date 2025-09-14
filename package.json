@@ -15,7 +15,6 @@
     },
     "dependencies": {
         "arctic": "^3.7.0",
-        "@mdi/font": "^7.4.47",
         "change-case": "^5.4.4",
         "ismobilejs": "^1.1.1",
         "lodash-es": "^4.17.21",
