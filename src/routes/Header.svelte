@@ -40,7 +40,9 @@ import github from "$lib/images/github.svg";
     </div>
 </header>
 
-<style>
+<style lang="postcss">
+@reference "tailwindcss";
+
 .corner {
     @apply size-12 flex justify-center;
     /* width: 3em;
@@ -68,7 +70,11 @@ import github from "$lib/images/github.svg";
 nav {
     display: flex;
     justify-content: center;
-    --background: rgba(255, 255, 255, 0.7);
+    --background: #fafafa80;
+}
+
+nav path {
+    fill: var(--background);
 }
 
 svg.logo {

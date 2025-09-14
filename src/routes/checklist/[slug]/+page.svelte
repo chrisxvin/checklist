@@ -82,7 +82,7 @@ function doDone() {
 }
 
 .list .dotted-space {
-    --border-color: theme(colors.neutral);
+    --border-color: theme(--color-neutral);
     border-color: color-mix(in oklch, var(--border-color) 50%, var(--border-color) 50%);
     height: calc(1lh - 4px);
 }

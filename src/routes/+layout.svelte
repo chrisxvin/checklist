@@ -20,7 +20,9 @@ let { children } = $props();
     <Footer />
 </div>
 
-<style>
+<style lang="postcss">
+@reference "tailwindcss";
+
 .app {
     min-height: 100vh;
     display: grid;

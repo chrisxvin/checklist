@@ -1,5 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-// import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vitest/config";
 import rollupJscc from "rollup-plugin-jscc";
 import AutoImport from "unplugin-auto-import/vite";
@@ -24,7 +24,7 @@ export default defineConfig({
             }),
             apply: "serve",
         },
-        // tailwindcss(),
+        tailwindcss(),
         sveltekit(),
         AutoImport({
             // include: [
