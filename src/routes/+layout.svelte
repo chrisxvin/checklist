@@ -9,10 +9,10 @@ import Footer from "./Footer.svelte";
 let { children } = $props();
 </script>
 
-<div class="app">
+<div class="app self-center mx-auto w-full md:w-xl min-h-[100vh] flex flex-col border border-blue-300 ">
     <Header />
 
-    <main class="main">
+    <main class="main flex-1 flex flex-col ">
         <!-- <slot /> -->
         {@render children()}
     </main>
@@ -24,13 +24,16 @@ let { children } = $props();
 @reference "tailwindcss";
 
 .app {
+    /*
     min-height: 100vh;
     display: grid;
     grid-template-rows: min-content 1fr min-content;
     grid-auto-flow: row;
+    */
 }
 
 .main {
+    /*
     @apply mb-auto px-4 contain-size;
 
     flex: 1;
@@ -41,5 +44,6 @@ let { children } = $props();
     max-width: 64rem;
     margin: 0 auto;
     box-sizing: border-box;
+    */
 }
 </style>

@@ -34,9 +34,11 @@ import github from "$lib/images/github.svg";
     </nav>
 
     <div class="corner">
+        <!--
         <a href="https://github.com/chrisxvin/checklist">
             <img src={github} alt="GitHub" />
         </a>
+         -->
     </div>
 </header>
 
@@ -77,7 +79,7 @@ nav path {
     fill: var(--background);
 }
 
-svg.logo {
+svg {
     width: 2em;
     height: 3em;
     display: block;

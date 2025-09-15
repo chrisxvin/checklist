@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const Icon: typeof import('../lib/components/index')['Icon']
   const afterUpdate: typeof import('svelte')['afterUpdate']
   const beforeUpdate: typeof import('svelte')['beforeUpdate']
   const blur: typeof import('svelte/transition')['blur']

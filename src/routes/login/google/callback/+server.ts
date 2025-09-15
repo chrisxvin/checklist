@@ -1,0 +1,82 @@
+import type { OAuth2Tokens } from "arctic";
+import type { RequestHandler } from "./$types";
+
+import { decodeIdToken } from "arctic";
+import {Long as Int64} from "mongodb";
+import db from "$lib/server/db";
+import { google } from "$lib/server/oauth";
+import { generateSessionToken, createSession, setSessionTokenCookie } from "$lib/server/session";
+
+export const GET: RequestHandler = async ({ cookies, url }) => {
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    const storedState = cookies.get("google_oauth_state");
+    const codeVerifier = cookies.get("google_code_verifier");
+    if (code == null || state == null || storedState == null || codeVerifier == null) {
+        log.error("回调参数缺失");
+        return new Response(null, {
+            status: 400,
+        });
+    }
+    if (state !== storedState) {
+        log.error("回调参数不一致, state !== storedState");
+        return new Response(null, {
+            status: 400,
+        });
+    }
+
+    let tokens: OAuth2Tokens;
+    try {
+        tokens = await google.validateAuthorizationCode(code, codeVerifier);
+    } catch (e) {
+        log.error("Google 认证失败", e);
+        // Invalid code or client credentials
+        return new Response(null, {
+            status: 400,
+        });
+    }
+    const claims = decodeIdToken(tokens.idToken()) as IOAuthClaims;
+    log("google oauth, claims:", claims);
+    const googleId = claims.sub;
+
+    // TODO: Replace this with your own DB query.
+    const existingUser = await db.account({ googleId });
+
+    if (existingUser != null) {
+        const sessionToken = generateSessionToken();
+        const session = await createSession(sessionToken, existingUser.uid);
+        setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+        return new Response(null, {
+            status: 302,
+            headers: {
+                Location: "/",
+            },
+        });
+    }
+
+    // get new user id
+    // todo: 怎么处理并发？
+    const maxUidDoc = await db.account().find({}).sort({ uid: -1 }).limit(1).toArray();
+    const maxUid = maxUidDoc.length > 0 ? maxUidDoc[0].uid : 1000; //todo: set min uid 1000 to const
+    const newUid = maxUid + 1;
+
+    // add new user
+    const user = await db.account().insertOne({
+        uid: Int64.fromNumber(newUid) as any,
+        username: claims.email,
+        displayName: claims.name,
+        email: claims.email,
+        googleId,
+        picture: claims.picture,
+    });
+
+    const sessionToken = generateSessionToken();
+    const session = await createSession(sessionToken, newUid);
+    setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+    return new Response(null, {
+        status: 302,
+        headers: {
+            Location: "/",
+        },
+    });
+};

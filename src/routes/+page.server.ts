@@ -8,7 +8,10 @@ export const load: PageServerLoad = async ({ params }) => {
     // const resp = await atlasFuncs.getLists();
     const res = await db.templates().find().toArray();
     if (res) {
-        res.forEach((p: any) => p._id = undefined);
+        res.forEach((p: any) => {
+            p.id = String(p._id);
+            p._id = undefined;
+        });
         return {
             list: res,
         };

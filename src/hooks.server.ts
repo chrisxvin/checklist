@@ -31,6 +31,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         log("server hook, Origin:", origin);
         // You can also compare it against the Host or X-Forwarded-Host header.
         if (origin === null || (
+            origin !== "http://localhost:3000" &&
             origin !== "https://localhost:3000" &&
             origin !== DEPLOY_URL)
         ) {
