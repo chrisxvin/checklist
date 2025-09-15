@@ -49,14 +49,14 @@ function doDone() {
 
 <ul class="list flex-1">
     {#each data.items as item, i}
-        <li class:active-step={i === stepIndex}>
+        <li class={["px-4 py-1", i === stepIndex && "rounded-lg bg-info-200"]}>
             <div class="form-control">
-                <label class="label cursor-pointer">
-                    <input type="checkbox" checked={item.checked} class="checkbox-primary checkbox" />
+                <label class="label w-full cursor-pointer">
+                    <input name={`check_${i}`} type="checkbox" checked={item.checked} class="checkbox checkbox-primary" />
                     <div class="label-text ml-4 flex w-full flex-row justify-between">
-                <span>{item.content}</span>
-                <span class="dotted-space mx-2 grow border-b-4 border-dotted border-neutral">&nbsp;</span>
-                <span>{item.shouldBe}</span>
+                        <span>{item.content}</span>
+                        <span class="dotted-space mx-2 grow border-b-4 border-dotted border-neutral">&nbsp;</span>
+                        <span>{item.shouldBe}</span>
                     </div>
                 </label>
             </div>
@@ -70,24 +70,16 @@ function doDone() {
 
 <div class="sticky bottom-0 flex flex-row gap-2">
     <button class="btn btn-primary" onclick={doStart}>Start</button>
-    <button class="btn btn-info flex-1" disabled={stepIndex < 0 || stepIndex >= data.items.length} onclick={doNext}>Next</button>
+    <button class="btn flex-1 btn-info" disabled={stepIndex < 0 || stepIndex >= data.items.length} onclick={doNext}>Next</button>
     <button class="btn" onclick={doDone}>Done</button>
 </div>
 
 <style lang="postcss">
 @reference "tailwindcss";
 
-.list li {
-    @apply px-4 py-1;
-}
-
 .list .dotted-space {
-    --border-color: theme(--color-neutral);
+    --border-color: var(--color-neutral);
     border-color: color-mix(in oklch, var(--border-color) 50%, var(--border-color) 50%);
     height: calc(1lh - 4px);
-}
-
-.active-step {
-    @apply rounded-lg bg-info-200;
 }
 </style>

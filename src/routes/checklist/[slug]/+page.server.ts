@@ -2,6 +2,7 @@ import type { PageServerLoad } from "./$types";
 
 import { error } from "@sveltejs/kit";
 import db from "$lib/server/db";
+import { ObjectId } from "mongodb";
 /*
 import { atlasFuncs } from "$lib/server/db";
 
@@ -21,10 +22,10 @@ export async function loadList(id: string): Promise<ICheckList> {
 export const load: PageServerLoad = async ({ params }) => {
     // const resp = await atlasFuncs.getLists();
     const res = await db.templates({
-        id: params.slug,
+        _id: ObjectId.createFromHexString(params.slug),
     });
     if (res) {
-        // res.forEach((p: any) => p._id = undefined);
+        delete (res as any)._id;
         return res;
     }
 
