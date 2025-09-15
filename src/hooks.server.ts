@@ -2,7 +2,7 @@ import type { Handle, ServerInit } from "@sveltejs/kit";
 
 import { redirect } from "@sveltejs/kit";
 import { default as detectMobile } from "ismobilejs";
-import { DEPLOY_URL } from "$env/static/private";
+import { DEPLOY_HOST } from "$env/static/private";
 import { env } from "$env/dynamic/private";
 import { connect } from "$lib/server/db";
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/session";
@@ -27,15 +27,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (event.request.method !== "GET") {
         // 阻止跨域攻击  csrf protection
-        const origin = event.request.headers.get("Origin");
-        log("server hook, Origin:", origin);
+        const host = event.request.headers.get("Host");
+        log("server hook, Host:", host);
         // You can also compare it against the Host or X-Forwarded-Host header.
-        if (origin === null || (
-            origin !== "http://localhost:3000" &&
-            origin !== "https://localhost:3000" &&
-            origin !== DEPLOY_URL)
+        if (host === null || (
+            host !== "localhost:3000" &&
+            host !== DEPLOY_HOST)
         ) {
-            log.warn("Invalid Origin header:", origin);
+            log.warn("Invalid Origin header:", host);
             return new Response(null, {
                 status: 403,
             });
