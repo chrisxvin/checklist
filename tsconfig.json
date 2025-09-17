@@ -2,7 +2,6 @@
     "extends": "./.svelte-kit/tsconfig.json",
     "compilerOptions": {
         "allowJs": true,
-        "checkJs": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
@@ -12,6 +11,7 @@
         "moduleResolution": "bundler",
         "typeRoots": [
             "node_modules/@types",
+            "@cyysummer/core/types",
             "./src/lib/types",
             "src/types",
         ],

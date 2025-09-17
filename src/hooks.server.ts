@@ -2,18 +2,18 @@ import type { Handle, ServerInit } from "@sveltejs/kit";
 
 import { redirect } from "@sveltejs/kit";
 import { default as detectMobile } from "ismobilejs";
+import { installGlobal } from "@cyysummer/core";
 import { DEPLOY_HOST } from "$env/static/private";
 import { env } from "$env/dynamic/private";
 import { connect } from "$lib/server/db";
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/session";
-import { log } from "$lib/utils/logger";
 
 //#if _DEBUG
 import { setGlobalDispatcher, ProxyAgent } from "undici";
 (env.https_proxy) && setGlobalDispatcher(new ProxyAgent(env.https_proxy));
 //#endif
 
-globalThis.log = log;
+installGlobal();
 
 export const init: ServerInit = () => {
     connect();

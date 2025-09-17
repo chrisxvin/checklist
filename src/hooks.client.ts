@@ -1,6 +1,5 @@
 import detectMobile from "ismobilejs";
-import { log } from "$lib/utils/logger";
+import { installGlobal } from "@cyysummer/core";
 
-globalThis.log = log;
-window.log = log;
+installGlobal();
 window.isMobile = detectMobile(window.navigator).any;
