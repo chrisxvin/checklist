@@ -14,13 +14,14 @@
         "format": "prettier --write ."
     },
     "dependencies": {
-        "@cyysummer/core": "^0.0.3",
+        "@cyysummer/auth-google": "^0.0.1",
+        "@cyysummer/core": "^0.0.4",
         "arctic": "^3.7.0",
         "change-case": "^5.4.4",
         "ismobilejs": "^1.1.1",
         "lodash-es": "^4.17.21",
         "luxon": "^3.7.2",
-        "mongodb": "^6.19.0",
+        "mongodb": "^6.20.0",
         "nanoid": "^5.1.5",
         "realm-web": "^2.0.1",
         "sortablejs": "^1.15.6",
