@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cyysummer/core':
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: ^0.0.3
+        version: 0.0.3(mitt@3.0.1)
       arctic:
         specifier: ^3.7.0
         version: 3.7.0
@@ -203,8 +203,10 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@cyysummer/core@0.0.1':
-    resolution: {integrity: sha512-RCDyNzvgoekYNX7peUpe5SY71RbQfhTc+cKOflev0CM1otzEue2YGwSprHCQcD71pMo9X56z0uEFXNBpp3B6Ew==}
+  '@cyysummer/core@0.0.3':
+    resolution: {integrity: sha512-Cvh0YEiAPsijII6wUVYp2FlygVVEao4DywoQj/EBLp9jwMsmVflYjlFTJgUzxVmYuzOaCiqsTA5mENfhSjcrXQ==}
+    peerDependencies:
+      mitt: ^3.0.1
 
   '@date-vir/duration@7.4.2':
     resolution: {integrity: sha512-6SNXMv8SncOo6Yla4twZseWxmi37oBOvnXS59TXRm6LJ28lgqtaOd5YCzW5qOsT/jstgfO0ax7qGUsmm812unw==}
@@ -2563,7 +2565,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@cyysummer/core@0.0.1':
+  '@cyysummer/core@0.0.3(mitt@3.0.1)':
     dependencies:
       mitt: 3.0.1
 
