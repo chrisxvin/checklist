@@ -1,14 +1,13 @@
 import type { Actions, PageServerLoad } from "./$types";
 
 import { db } from "$lib/server";
+import { loginWithPasshash } from "$lib/server/auth-login";
 import {
-    createSession,
     deleteSessionTokenCookie,
-    generateSessionToken,
     invalidateAllSessions,
-    setSessionTokenCookie,
 } from "$lib/server/session";
 
+// 登录页只负责渲染与表单 action，真正的登录逻辑复用共享认证函数。
 export const load: PageServerLoad = async ({ cookies, locals }) => {
     // session validation
     if (locals.session != null) {
@@ -27,7 +26,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
         if (accountObj == null) {
             // 因为各种意外，没有查到对应的账号，认定是非法请求。
             deleteSessionTokenCookie(cookies);
-            invalidateAllSessions(uid);
+            await invalidateAllSessions(uid);
             locals.session = null;
         } else {
             delete accountObj._id;
@@ -38,6 +37,8 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
             account: accountObj,
         };
     }
+
+    return {};
 };
 
 export const actions = {
@@ -45,21 +46,11 @@ export const actions = {
         const formData = await request.formData();
         const username = formData.get("username") as string;
         const passhash = formData.get("passhash") as string;
-        log(`User ${username} is trying to log in with password ${passhash}`);
 
-        // 检查参数
-        const accountInDB = await db.collection<IAccount>("account").findOne<IAccount>({ username, passhash });
-
-        if (!accountInDB) {
-            return { success: false, message: "用户名或密码不匹配" };
-        }
-
-        log(accountInDB);
-
-        const token = generateSessionToken();
-        const session = await createSession(token, accountInDB.uid);
-        setSessionTokenCookie(cookies, token, session.expiresAt);
-
-        return { success: true };
+        return await loginWithPasshash({
+            username,
+            passhash,
+            cookies,
+        });
     },
 } satisfies Actions;

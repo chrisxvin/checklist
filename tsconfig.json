@@ -11,8 +11,7 @@
         "moduleResolution": "bundler",
         "typeRoots": [
             "node_modules/@types",
-            "@cyysummer/core/types",
-            "./src/lib/types",
+            "@buxton/core/types",
             "src/types",
         ],
     },

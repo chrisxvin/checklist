@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @plugin "daisyui" {
     themes: light --default;
@@ -13,7 +14,7 @@
     --color-primary-content: #fafafa;
     --color-secondary: #9fa6b2;
     --color-secondary-content: #fafafa;
-    --color-accent: oklch(71.86% 0.2176 310.43);
+    --color-accent: #ab47bc;
     --color-accent-content: #fafafa;
     --color-neutral: oklch(23.04% 0.065 269.31);
     --color-neutral-content: oklch(94.51% 0.179 104.32);
@@ -112,6 +113,14 @@
     --color-info-800: #236d86;
     --color-info-900: #1a5265;
     --color-info-950: #0f3342;
+
+    /* OneNote colors */
+    --color-onenote-bg-0: #e2efd9;
+    --color-onenote-bg-1: #deebf6;
+    --color-onenote-bg-2: #fbe5d5;
+    --color-onenote-bg-3: #fadbd2;
+    --color-onenote-bg-4: #fff2cc;
+    --color-onenote-bg-5: #e5e0ec;
 }
 
 /*
@@ -151,7 +160,19 @@
         -moz-appearance: textfield;
     }
 
-    /*
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+/*
 .btn:focus-visible,
 .card:focus-visible,
 .checkbox:focus-visible,
@@ -201,73 +222,29 @@
             linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
     }
 
-    h1,
-    h2,
-    p {
-        font-weight: 400;
-    }
+}
 
-    p {
-        line-height: 1.5;
-    }
 
-    a {
-        color: var(--color-theme-1);
-        text-decoration: none;
-    }
+.onenote-bg-0 {
+    background-color: var(--color-onenote-bg-0);
+}
 
-    a:hover {
-        text-decoration: underline;
-    }
+.onenote-bg-1 {
+    background-color: var(--color-onenote-bg-1);
+}
 
-    h1 {
-        font-size: 2rem;
-        text-align: center;
-    }
+.onenote-bg-2 {
+    background-color: var(--color-onenote-bg-2);
+}
 
-    h2 {
-        font-size: 1rem;
-    }
+.onenote-bg-3 {
+    background-color: var(--color-onenote-bg-3);
+}
 
-    pre {
-        font-size: 16px;
-        font-family: var(--font-mono);
-        background-color: rgba(255, 255, 255, 0.45);
-        border-radius: 3px;
-        box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
-        padding: 0.5em;
-        overflow-x: auto;
-        color: var(--color-text);
-    }
+.onenote-bg-4 {
+    background-color: var(--color-onenote-bg-4);
+}
 
-    .text-column {
-        display: flex;
-        max-width: 48rem;
-        flex: 0.6;
-        flex-direction: column;
-        justify-content: center;
-        margin: 0 auto;
-    }
-
-    button:focus:not(:focus-visible) {
-        outline: none;
-    }
-
-    @media (min-width: 720px) {
-        h1 {
-            font-size: 2.4rem;
-        }
-    }
-
-    .visually-hidden {
-        border: 0;
-        clip: rect(0 0 0 0);
-        height: auto;
-        margin: 0;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-        white-space: nowrap;
-    }
+.onenote-bg-5 {
+    background-color: var(--color-onenote-bg-5);
 }

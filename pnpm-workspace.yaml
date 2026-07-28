@@ -1,2 +1,5 @@
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
+
+overrides:
+#  "@cyysummer/core@*": "link:../../Libs/Web/starlex/packages/core"

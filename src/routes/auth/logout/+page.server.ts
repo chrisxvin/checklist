@@ -14,6 +14,6 @@ export const actions: Actions = {
             deleteSessionTokenCookie(event.cookies);
         }
 
-        return redirect(303, "/login");
+        return redirect(303, "/auth/login");
     },
 };

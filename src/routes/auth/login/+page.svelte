@@ -2,6 +2,7 @@
 import type { PageProps } from "./$types";
 
 import { enhance } from "$app/forms";
+import { page } from "$app/state";
 import { sha256 } from "$lib/utils";
 
 let { data, form }: PageProps = $props();
@@ -9,6 +10,8 @@ let { data, form }: PageProps = $props();
 let username = $state("");
 let password = $state("");
 let passhash = $state("");
+let notice = $derived(page.url.searchParams.get("notice"));
+let error = $derived(page.url.searchParams.get("error"));
 
 $effect(() => {
     sha256(password).then(hash => {
@@ -49,7 +52,7 @@ $effect(() => {
         <div class="form-group">
             <p>&nbsp;</p>
             <p>Or login with:</p>
-            <a href="/login/google" class="btn">Google</a>
+            <a href="/auth/login/google" class="btn">Google</a>
             <!-- <button class="btn btn-secondary">GitHub</button> -->
         </div>
 
@@ -59,6 +62,10 @@ $effect(() => {
             <p>Successfully logged in! Welcome back.</p>
         {:else if form?.success === false}
             <p class="text-danger">{form?.message}</p>
+        {:else if notice === "activation_required"}
+            <p class="text-warning">注册已完成，等待管理员激活后才能登录。</p>
+        {:else if error === "account_inactive"}
+            <p class="text-warning">账号尚未激活，请联系管理员。</p>
         {/if}
     {/if}
 </div>

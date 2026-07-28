@@ -1,5 +1,5 @@
+import "@buxton/core/global";
+import "@buxton/core/polyfill";
 import detectMobile from "ismobilejs";
-import { installGlobal } from "@cyysummer/core";
 
-installGlobal();
 window.isMobile = detectMobile(window.navigator).any;

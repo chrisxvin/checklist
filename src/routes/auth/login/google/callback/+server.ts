@@ -6,6 +6,7 @@ import {Long as Int64} from "mongodb";
 import db from "$lib/server/db";
 import { google } from "$lib/server/oauth";
 import { generateSessionToken, createSession, setSessionTokenCookie } from "$lib/server/session";
+import { shouldRequireManualActivation } from "$lib/server/system-settings";
 
 export const GET: RequestHandler = async ({ cookies, url }) => {
     const code = url.searchParams.get("code");
@@ -43,9 +44,27 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     const existingUser = await db.account({ googleId });
 
     if (existingUser != null) {
+        if (existingUser.isActive === false) {
+            return new Response(null, {
+                status: 302,
+                headers: {
+                    Location: "/auth/login?error=account_inactive",
+                },
+            });
+        }
+
         const sessionToken = generateSessionToken();
         const session = await createSession(sessionToken, existingUser.uid);
         setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+        await db.account().updateOne(
+            { uid: existingUser.uid } as any,
+            {
+                $set: {
+                    lastLogin: new Date(),
+                    updatedAt: new Date(),
+                },
+            },
+        );
         return new Response(null, {
             status: 302,
             headers: {
@@ -59,6 +78,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     const maxUidDoc = await db.account().find({}).sort({ uid: -1 }).limit(1).toArray();
     const maxUid = maxUidDoc.length > 0 ? maxUidDoc[0].uid : 1000; //todo: set min uid 1000 to const
     const newUid = maxUid + 1;
+    const requireManualActivation = await shouldRequireManualActivation();
 
     // add new user
     const user = await db.account().insertOne({
@@ -68,11 +88,32 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
         email: claims.email,
         googleId,
         picture: claims.picture,
+        isActive: !requireManualActivation,
+        createdAt: new Date(),
+        updatedAt: new Date(),
     });
+
+    if (requireManualActivation) {
+        return new Response(null, {
+            status: 302,
+            headers: {
+                Location: "/auth/login?notice=activation_required",
+            },
+        });
+    }
 
     const sessionToken = generateSessionToken();
     const session = await createSession(sessionToken, newUid);
     setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+    await db.account().updateOne(
+        { uid: newUid } as any,
+        {
+            $set: {
+                lastLogin: new Date(),
+                updatedAt: new Date(),
+            },
+        },
+    );
     return new Response(null, {
         status: 302,
         headers: {

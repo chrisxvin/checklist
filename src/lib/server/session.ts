@@ -1,5 +1,8 @@
-import { useSession } from "@cyysummer/auth-google";
-import { db } from "./db";
+import { useSession, usePostgresAdapter } from "@buxton/auth-google";
+import { sql } from "./db";
+
+const tableName = "session";
+const adapter = usePostgresAdapter(sql, tableName);
 
 const {
     generateSessionToken,
@@ -10,7 +13,7 @@ const {
     setSessionTokenCookie,
     deleteSessionTokenCookie,
 } = useSession({
-    db,
+    adapter,
 });
 
 export {

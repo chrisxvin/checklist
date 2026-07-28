@@ -1,6 +1,7 @@
 import type { RequestHandler } from "./$types";
 
 import { generateState, generateCodeVerifier } from "arctic";
+import { dev } from "$app/environment";
 import { google } from "$lib/server/oauth";
 
 export const GET: RequestHandler = async ({ cookies }) => {
@@ -13,12 +14,14 @@ export const GET: RequestHandler = async ({ cookies }) => {
         httpOnly: true,
         maxAge: 60 * 10, // 10 minutes
         sameSite: "lax",
+        secure: !dev,
     });
     cookies.set("google_code_verifier", codeVerifier, {
         path: "/",
         httpOnly: true,
         maxAge: 60 * 10, // 10 minutes
         sameSite: "lax",
+        secure: !dev,
     });
 
     return new Response(null, {

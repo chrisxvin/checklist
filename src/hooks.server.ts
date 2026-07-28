@@ -1,25 +1,28 @@
 import type { Handle, ServerInit } from "@sveltejs/kit";
 
+import "dotenv/config";
+import "@buxton/core/global";
+import "@buxton/core/polyfill";
 import { redirect } from "@sveltejs/kit";
 import { default as detectMobile } from "ismobilejs";
-import { installGlobal } from "@cyysummer/core";
-import { DEPLOY_HOST } from "$env/static/private";
+import { DEPLOY_URL } from "$env/static/private";
 import { env } from "$env/dynamic/private";
 import { connect } from "$lib/server/db";
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/session";
-
-//#if _DEBUG
-import { setGlobalDispatcher, ProxyAgent } from "undici";
-(env.https_proxy) && setGlobalDispatcher(new ProxyAgent(env.https_proxy));
-//#endif
-
-installGlobal();
 
 export const init: ServerInit = () => {
     connect();
 };
 
+function isShareAccessPath(pathname: string) {
+    return /\/share\/[^/]+$/.test(pathname);
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
+    const VALID_HOSTNAME = /^(travelbook|local)(\.zt)?\.ixvin\.(com|net|cc)$/;
+    const isAuthRoute = event.url.pathname.startsWith("/auth/");
+    const isAuthApiRoute = event.url.pathname.startsWith("/_api/auth/");
+
     // 判断是否为移动设备
     // `ismobilejs` needs a hack.
     // log(typeof detectMobile, detectMobile);
@@ -27,22 +30,25 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (event.request.method !== "GET") {
         // 阻止跨域攻击  csrf protection
-        const host = event.request.headers.get("Host");
-        log("server hook, Host:", host);
+        const origin = event.request.headers.get("Origin");
+        const hostname = event.url.hostname;
+        log("server hook, url:", hostname);
         // You can also compare it against the Host or X-Forwarded-Host header.
-        if (host === null || (
-            host !== "localhost:3000" &&
-            host !== DEPLOY_HOST)
+        // #if PROD
+        if (origin === null
+             || origin !== DEPLOY_URL
+            //  || hostname !== "localhost"
+             || !VALID_HOSTNAME.test(hostname)
         ) {
-            log.warn("Invalid Origin header:", host);
+            log.warn("Invalid request:", hostname);
             return new Response(null, {
                 status: 403,
             });
         }
+        // #endif
 
-        const url = new URL(event.request.url);
-        if (url.pathname.startsWith("/login")) {
-            // 登录请求不需要重定向到登录页
+        if (isAuthRoute || isAuthApiRoute) {
+            // 认证页面与认证 API 不应被未登录态重定向拦截。
             return resolve(event);
         }
     }
@@ -53,26 +59,55 @@ export const handle: Handle = async ({ event, resolve }) => {
         event.locals.session = undefined;
 
         // 访问的是不需要登录的页面
-        log(event.url);
         if (event.url.pathname == "/" ||
-            event.url.pathname == "/login" ||
-            event.url.pathname.startsWith("/plan/") && event.url.searchParams.get("s") != null
+            isAuthRoute ||
+            isAuthApiRoute ||
+            event.url.pathname.startsWith("/public") ||
+            isShareAccessPath(event.url.pathname)
         ) {
             return resolve(event);
         }
 
         // 登录去吧！
-        return redirect(302, "/login");
+        return redirect(302, "/auth/login");
     }
 
     const { session } = await validateSessionToken(token);
-    if (session != null) {
-        setSessionTokenCookie(event.cookies, token, session.expiresAt);
-    } else {
+    if (session == null) {
         deleteSessionTokenCookie(event.cookies);
+        return redirect(302, "/auth/login");
+    } else {
+        setSessionTokenCookie(event.cookies, token, session.expiresAt);
     }
 
     event.locals.session = session;
+
+    /*
+    const account = await db.account().findOne<IAccount>({
+        uid: session.uid,
+    }, {
+        projection: {
+            username: 1,
+            email: 1,
+            displayName: 1,
+            picture: 1,
+        },
+    });
+    if (!account) {
+        return redirect(302, "/auth/login");
+    }
+
+    if (account.isActive === false) {
+        deleteSessionTokenCookie(event.cookies);
+        event.locals.session = undefined;
+        if (isAuthRoute || isAuthApiRoute) {
+            return resolve(event);
+        }
+        return redirect(302, "/auth/login?error=account_inactive");
+    }
+
+    event.locals.user = account;
+    */
 
     return resolve(event);
 };
