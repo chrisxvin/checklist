@@ -6,12 +6,12 @@ import "@buxton/core/polyfill";
 import { redirect } from "@sveltejs/kit";
 import { default as detectMobile } from "ismobilejs";
 import { DEPLOY_URL } from "$env/static/private";
-import { env } from "$env/dynamic/private";
-import { connect } from "$lib/server/db";
+import "$lib/server/db";
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/session";
+import { sql } from "$lib/server/db";
 
 export const init: ServerInit = () => {
-    connect();
+    // connect();
 };
 
 function isShareAccessPath(pathname: string) {
@@ -19,13 +19,13 @@ function isShareAccessPath(pathname: string) {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const VALID_HOSTNAME = /^(travelbook|local)(\.zt)?\.ixvin\.(com|net|cc)$/;
+    const VALID_HOSTNAME = /^(preflight|local)(\.zt|\.ts|\.app)?\.ixvin\.(com|net|cc)$/;
     const isAuthRoute = event.url.pathname.startsWith("/auth/");
     const isAuthApiRoute = event.url.pathname.startsWith("/_api/auth/");
 
     // 判断是否为移动设备
     // `ismobilejs` needs a hack.
-    // log(typeof detectMobile, detectMobile);
+    // log("detectMobile", typeof detectMobile, detectMobile);
     globalThis.isMobile = (detectMobile as any).default(event.request.headers.get("User-Agent") ?? "").any;
 
     if (event.request.method !== "GET") {
@@ -36,9 +36,9 @@ export const handle: Handle = async ({ event, resolve }) => {
         // You can also compare it against the Host or X-Forwarded-Host header.
         // #if PROD
         if (origin === null
-             || origin !== DEPLOY_URL
+            || origin !== DEPLOY_URL
             //  || hostname !== "localhost"
-             || !VALID_HOSTNAME.test(hostname)
+            || !VALID_HOSTNAME.test(hostname)
         ) {
             log.warn("Invalid request:", hostname);
             return new Response(null, {
@@ -57,13 +57,13 @@ export const handle: Handle = async ({ event, resolve }) => {
     // 没有 session？
     if (token == null) {
         event.locals.session = undefined;
+        event.locals.user = undefined;
 
         // 访问的是不需要登录的页面
-        if (event.url.pathname == "/" ||
-            isAuthRoute ||
-            isAuthApiRoute ||
-            event.url.pathname.startsWith("/public") ||
-            isShareAccessPath(event.url.pathname)
+        if (event.url.pathname == "/"
+            || isAuthRoute
+            || isAuthApiRoute
+            // || isShareAccessPath(event.url.pathname)
         ) {
             return resolve(event);
         }
@@ -80,34 +80,28 @@ export const handle: Handle = async ({ event, resolve }) => {
         setSessionTokenCookie(event.cookies, token, session.expiresAt);
     }
 
-    event.locals.session = session;
-
-    /*
-    const account = await db.account().findOne<IAccount>({
-        uid: session.uid,
-    }, {
-        projection: {
-            username: 1,
-            email: 1,
-            displayName: 1,
-            picture: 1,
-        },
-    });
+    const rows = await sql<Partial<IAccount>[]>`
+        SELECT username, email, display_name, picture, is_active
+        FROM account
+        WHERE uid = ${session.uid}
+    `;
+    const account = rows[0];
     if (!account) {
         return redirect(302, "/auth/login");
     }
 
-    if (account.isActive === false) {
+    if (!account.isActive) {
         deleteSessionTokenCookie(event.cookies);
         event.locals.session = undefined;
+        event.locals.user = undefined;
         if (isAuthRoute || isAuthApiRoute) {
             return resolve(event);
         }
         return redirect(302, "/auth/login?error=account_inactive");
     }
 
+    event.locals.session = session;
     event.locals.user = account;
-    */
 
     return resolve(event);
 };

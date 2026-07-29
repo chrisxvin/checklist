@@ -2,48 +2,18 @@
 import "../app.css";
 </script>
 
-<script>
-import Header from "./Header.svelte";
-import Footer from "./Footer.svelte";
+<script lang="ts">
+import type { LayoutProps } from "./$types";
 
-let { children } = $props();
+let { data, children }: LayoutProps = $props();
 </script>
 
-<div class="app self-center mx-auto w-full md:w-xl min-h-[100vh] flex flex-col border border-blue-300 ">
-    <Header />
-
-    <main class="main flex-1 flex flex-col ">
-        <!-- <slot /> -->
-        {@render children()}
-    </main>
-
-    <Footer />
+<div class="app mx-auto flex min-h-screen w-full flex-col self-center border border-blue-300 md:w-xl">
+    <!-- <slot /> -->
+    {@render children()}
 </div>
 
 <style lang="postcss">
 @reference "tailwindcss";
 
-.app {
-    /*
-    min-height: 100vh;
-    display: grid;
-    grid-template-rows: min-content 1fr min-content;
-    grid-auto-flow: row;
-    */
-}
-
-.main {
-    /*
-    @apply mb-auto px-4 contain-size;
-
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    width: 100%;
-    max-width: 64rem;
-    margin: 0 auto;
-    box-sizing: border-box;
-    */
-}
 </style>

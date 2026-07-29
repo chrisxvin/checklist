@@ -2,11 +2,11 @@ import type { OAuth2Tokens } from "arctic";
 import type { RequestHandler } from "./$types";
 
 import { decodeIdToken } from "arctic";
-import {Long as Int64} from "mongodb";
-import db from "$lib/server/db";
+import { sql } from "$lib/server/db";
 import { google } from "$lib/server/oauth";
 import { generateSessionToken, createSession, setSessionTokenCookie } from "$lib/server/session";
-import { shouldRequireManualActivation } from "$lib/server/system-settings";
+// import { shouldRequireManualActivation } from "$lib/server/system-settings";
+import { emailToUsername } from "$lib/utils";
 
 export const GET: RequestHandler = async ({ cookies, url }) => {
     const code = url.searchParams.get("code");
@@ -41,7 +41,13 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     const googleId = claims.sub;
 
     // TODO: Replace this with your own DB query.
-    const existingUser = await db.account({ googleId });
+    // const existingUser = await db.account({ googleId });
+    const users = await sql<IAccount[]>`
+        SELECT *
+        FROM account
+        WHERE google_id = ${googleId}
+    `;
+    const existingUser = users[0];
 
     if (existingUser != null) {
         if (existingUser.isActive === false) {
@@ -56,6 +62,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
         const sessionToken = generateSessionToken();
         const session = await createSession(sessionToken, existingUser.uid);
         setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+        /*
         await db.account().updateOne(
             { uid: existingUser.uid } as any,
             {
@@ -65,6 +72,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
                 },
             },
         );
+        */
         return new Response(null, {
             status: 302,
             headers: {
@@ -73,26 +81,17 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
         });
     }
 
-    // get new user id
-    // todo: 怎么处理并发？
-    const maxUidDoc = await db.account().find({}).sort({ uid: -1 }).limit(1).toArray();
-    const maxUid = maxUidDoc.length > 0 ? maxUidDoc[0].uid : 1000; //todo: set min uid 1000 to const
-    const newUid = maxUid + 1;
-    const requireManualActivation = await shouldRequireManualActivation();
+    // const requireManualActivation = await shouldRequireManualActivation();
 
     // add new user
-    const user = await db.account().insertOne({
-        uid: Int64.fromNumber(newUid) as any,
-        username: claims.email,
-        displayName: claims.name,
-        email: claims.email,
-        googleId,
-        picture: claims.picture,
-        isActive: !requireManualActivation,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    });
+    const rows = await sql<{ id: number; }[]>`
+        INSERT INTO account (username, email, display_name, google_id, picture)
+        VALUES (${emailToUsername(claims.email)}, ${claims.email}, ${claims.name}, ${googleId}, ${claims.picture})
+        RETURNING id;
+    `;
+    const newUid = rows[0].id;
 
+    /*
     if (requireManualActivation) {
         return new Response(null, {
             status: 302,
@@ -101,10 +100,12 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
             },
         });
     }
+    */
 
     const sessionToken = generateSessionToken();
     const session = await createSession(sessionToken, newUid);
     setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+    /*
     await db.account().updateOne(
         { uid: newUid } as any,
         {
@@ -114,6 +115,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
             },
         },
     );
+    */
     return new Response(null, {
         status: 302,
         headers: {

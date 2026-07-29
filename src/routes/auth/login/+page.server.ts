@@ -1,6 +1,6 @@
 import type { Actions, PageServerLoad } from "./$types";
 
-import { db } from "$lib/server";
+import { sql } from "$lib/server/db";
 import { loginWithPasshash } from "$lib/server/auth-login";
 import {
     deleteSessionTokenCookie,
@@ -12,24 +12,17 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
     // session validation
     if (locals.session != null) {
         const { uid } = locals.session;
-        const accountObj = await db.collection<IAccount>("account").findOne<IAccount>(
-            { uid },
-            {
-                projection: {
-                    username: 1,
-                    email: 1,
-                    displayName: 1,
-                    picture: 1,
-                },
-            },
-        );
+        const rows = await sql<IAccount[]>`
+            SELECT *
+            FROM account
+            WHERE uid = ${uid}
+        `;
+        const accountObj = rows[0];
         if (accountObj == null) {
             // 因为各种意外，没有查到对应的账号，认定是非法请求。
             deleteSessionTokenCookie(cookies);
             await invalidateAllSessions(uid);
             locals.session = null;
-        } else {
-            delete accountObj._id;
         }
 
         return {
