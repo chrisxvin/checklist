@@ -7,7 +7,13 @@
 -- 账号
 
 CREATE TABLE account (
-    uid int4 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    uid int4 PRIMARY KEY GENERATED ALWAYS AS IDENTITY (
+INCREMENT 1
+MINVALUE  1000
+START 1000
+CACHE 1
+),
+    slug varchar(255) NOT NULL UNIQUE,
     username varchar(255) NOT NULL UNIQUE,
     passhash varchar(255),
     email varchar(255) NOT NULL,
@@ -17,16 +23,21 @@ CREATE TABLE account (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     is_active bool NOT NULL DEFAULT true,
+    CHECK (slug ~ '^[A-Za-z0-9]{6,}$'),
     CHECK (username ~ '^[A-Za-z][A-Za-z0-9\-_]{2,29}$')
 );
 
-COMMENT ON COLUMN account.uid IS '账号ID';
+ALTER TABLE account OWNER TO preflight;
 
+CREATE UNIQUE INDEX idx_account_slug ON account (slug);
+CREATE UNIQUE INDEX idx_account_username ON account (username);
+CREATE UNIQUE INDEX idx_account_email ON account (email);
+
+COMMENT ON COLUMN account.uid IS '主键';
 COMMENT ON COLUMN account.display_name IS '用户昵称';
-
 COMMENT ON COLUMN account.google_id IS '用 Google 登录绑定的 ID';
-
 COMMENT ON COLUMN account.picture IS '头像URL';
+COMMENT ON COLUMN account.slug IS '唯一标识符（URL友好）';
 
 -- 登录会话
 
