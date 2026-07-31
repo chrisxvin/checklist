@@ -2,11 +2,10 @@ import type { OAuth2Tokens } from "arctic";
 import type { RequestHandler } from "./$types";
 
 import { decodeIdToken } from "arctic";
-import { sql } from "$lib/server/db";
+import { account } from "$lib/server/db";
 import { google } from "$lib/server/oauth";
 import { generateSessionToken, createSession, setSessionTokenCookie } from "$lib/server/session";
 // import { shouldRequireManualActivation } from "$lib/server/system-settings";
-import { emailToUsername } from "$lib/utils";
 
 export const GET: RequestHandler = async ({ cookies, url }) => {
     const code = url.searchParams.get("code");
@@ -40,14 +39,10 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     log("google oauth, claims:", claims);
     const googleId = claims.sub;
 
-    // TODO: Replace this with your own DB query.
     // const existingUser = await db.account({ googleId });
-    const users = await sql<IAccount[]>`
-        SELECT *
-        FROM account
-        WHERE google_id = ${googleId}
-    `;
-    const existingUser = users[0];
+    const existingUser = await account.findAccount({
+        googleId,
+    });
 
     if (existingUser != null) {
         if (existingUser.isActive === false) {
@@ -84,12 +79,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     // const requireManualActivation = await shouldRequireManualActivation();
 
     // add new user
-    const rows = await sql<{ id: number; }[]>`
-        INSERT INTO account (username, email, display_name, google_id, picture)
-        VALUES (${emailToUsername(claims.email)}, ${claims.email}, ${claims.name}, ${googleId}, ${claims.picture})
-        RETURNING id;
-    `;
-    const newUid = rows[0].id;
+    const newUid = await account.createAccountFromGoogle(claims);
 
     /*
     if (requireManualActivation) {
