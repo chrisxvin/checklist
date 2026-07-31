@@ -6,7 +6,6 @@ import "@buxton/core/polyfill";
 import { redirect } from "@sveltejs/kit";
 import { default as detectMobile } from "ismobilejs";
 import { DEPLOY_URL } from "$env/static/private";
-import "$lib/server/db";
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/session";
 import { sql } from "$lib/server/db";
 
