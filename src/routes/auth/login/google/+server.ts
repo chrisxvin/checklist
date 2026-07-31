@@ -1,5 +1,6 @@
 import type { RequestHandler } from "./$types";
 
+import { redirect } from "@sveltejs/kit";
 import { generateState, generateCodeVerifier } from "arctic";
 import { dev } from "$app/environment";
 import { google } from "$lib/server/oauth";
@@ -24,10 +25,5 @@ export const GET: RequestHandler = async ({ cookies }) => {
         secure: !dev,
     });
 
-    return new Response(null, {
-        status: 302,
-        headers: {
-            Location: url.toString(),
-        },
-    });
+    redirect(302, url.toString());
 };

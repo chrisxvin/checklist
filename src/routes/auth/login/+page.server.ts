@@ -1,12 +1,12 @@
 import type { Actions, PageServerLoad } from "./$types";
 
+import { redirect } from "@sveltejs/kit";
 import { account } from "$lib/server/db";
 import { loginWithPasshash } from "$lib/server/auth-login";
 import {
     deleteSessionTokenCookie,
     invalidateAllSessions,
 } from "$lib/server/session";
-import { redirect } from "@sveltejs/kit";
 
 // 登录页只负责渲染与表单 action，真正的登录逻辑复用共享认证函数。
 export const load = (async ({ cookies, locals }) => {

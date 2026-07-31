@@ -1,6 +1,7 @@
 import type { OAuth2Tokens } from "arctic";
 import type { RequestHandler } from "./$types";
 
+import { error, redirect } from "@sveltejs/kit";
 import { decodeIdToken } from "arctic";
 import { account } from "$lib/server/db";
 import { google } from "$lib/server/oauth";
@@ -14,15 +15,11 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     const codeVerifier = cookies.get("google_code_verifier");
     if (code == null || state == null || storedState == null || codeVerifier == null) {
         log.error("回调参数缺失");
-        return new Response(null, {
-            status: 400,
-        });
+        error(400);
     }
     if (state !== storedState) {
         log.error("回调参数不一致, state !== storedState");
-        return new Response(null, {
-            status: 400,
-        });
+        error(400);
     }
 
     let tokens: OAuth2Tokens;
@@ -31,27 +28,45 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
     } catch (e) {
         log.error("Google 认证失败", e);
         // Invalid code or client credentials
-        return new Response(null, {
-            status: 400,
-        });
+        error(400);
     }
     const claims = decodeIdToken(tokens.idToken()) as IOAuthClaims;
-    log("google oauth, claims:", claims);
-    const googleId = claims.sub;
-
-    // const existingUser = await db.account({ googleId });
     const existingUser = await account.findAccount({
-        googleId,
+        googleId: claims.sub,
     });
 
-    if (existingUser != null) {
-        if (existingUser.isActive === false) {
-            return new Response(null, {
-                status: 302,
-                headers: {
-                    Location: "/auth/login?error=account_inactive",
+    let slug: string;
+    if (existingUser == null) {
+        // const requireManualActivation = await shouldRequireManualActivation();
+
+        // add new user
+        const newAccount = await account.createAccountFromGoogle(claims);
+
+        /*
+        if (requireManualActivation) {
+            redirect(303, "/auth/login?notice=activation_required");
+        }
+        */
+
+        const sessionToken = generateSessionToken();
+        const session = await createSession(sessionToken, newAccount.uid);
+        setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+        /*
+        await db.account().updateOne(
+            { uid: newUid } as any,
+            {
+                $set: {
+                    lastLogin: new Date(),
+                    updatedAt: new Date(),
                 },
-            });
+            },
+        );
+        */
+
+        slug = newAccount.slug;
+    } else {
+        if (existingUser.isActive === false) {
+            redirect(303, "/auth/login?error=account_inactive");
         }
 
         const sessionToken = generateSessionToken();
@@ -68,48 +83,9 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
             },
         );
         */
-        return new Response(null, {
-            status: 302,
-            headers: {
-                Location: "/",
-            },
-        });
+
+        slug = existingUser.slug;
     }
 
-    // const requireManualActivation = await shouldRequireManualActivation();
-
-    // add new user
-    const newUid = await account.createAccountFromGoogle(claims);
-
-    /*
-    if (requireManualActivation) {
-        return new Response(null, {
-            status: 302,
-            headers: {
-                Location: "/auth/login?notice=activation_required",
-            },
-        });
-    }
-    */
-
-    const sessionToken = generateSessionToken();
-    const session = await createSession(sessionToken, newUid);
-    setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
-    /*
-    await db.account().updateOne(
-        { uid: newUid } as any,
-        {
-            $set: {
-                lastLogin: new Date(),
-                updatedAt: new Date(),
-            },
-        },
-    );
-    */
-    return new Response(null, {
-        status: 302,
-        headers: {
-            Location: "/",
-        },
-    });
+    redirect(303, `/u/${slug}`);
 };
