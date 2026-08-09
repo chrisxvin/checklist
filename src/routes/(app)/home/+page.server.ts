@@ -5,7 +5,7 @@ import { checklist } from "$lib/server/db";
 const MAX_STEPS_IN_PREVIEW = 3;
 const UNCATEGORIED = "无分类";
 export const load = (async ({ locals, params }) => {
-    const checklists = await checklist.findAll(params.accountSlug);
+    const checklists = await checklist.find({ ownerId: locals.user.uid });
 
     // 预览模式只显示3条
     checklists.forEach(l => {

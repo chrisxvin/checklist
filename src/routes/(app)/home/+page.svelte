@@ -11,7 +11,7 @@ let { data, params }: PageProps = $props();
                 <!-- todo: 可以自己给分类设置颜色 -->
                 <span class="badge badge-xs badge-warning">{checklist.category}</span>
                 <div class="flex justify-between">
-                    <a href="/u/{params.accountSlug}/list/{checklist.listSlug}" class="hover:link hover:link-primary" title="List">
+                    <a href="/list/{checklist.slug}" class="hover:link hover:link-primary" title="List">
                         <h2 class="text-3xl font-bold">{checklist.name}</h2>
                     </a>
                 </div>
@@ -45,7 +45,7 @@ let { data, params }: PageProps = $props();
 
 <div class="fab">
     <button class="btn btn-lg btn-circle btn-primary">
-        <a href="/u/{params.accountSlug}/list/add" title="Add new list">
+        <a href="/list/add" title="Add new list">
             <svg
                 aria-label="New"
                 xmlns="http://www.w3.org/2000/svg"

@@ -18,7 +18,7 @@ export const actions = {
             cookies,
         });
         if (r.success) {
-            redirect(303, `/u/${r.slug!}`);
+            redirect(303, `/home`);
         } else {
             return r;
         }

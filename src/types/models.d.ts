@@ -1,6 +1,6 @@
 interface IChecklistInstance {
     listId: string;
-    listSlug: string;
+    slug: string;
     name: string;
     description?: string;
     category?: string;
@@ -11,4 +11,5 @@ interface IChecklistInstance {
     version: number;
     executionMode: EXECUTION_MODE;
     steps: IStep[];
+    ownerId: number;
 }

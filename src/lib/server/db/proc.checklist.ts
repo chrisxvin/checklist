@@ -1,19 +1,22 @@
 import { buildWhere, sql } from "./db";
 
-export async function findAll(accountSlug: string): Promise<IChecklistInstance[]> {
+export async function find(filter: {
+    ownerId: number;
+    slug?: string;
+}): Promise<IChecklistInstance[]> {
     const rows = sql<IChecklistInstance[]>`
         SELECT *
         FROM checklist_latest
-        WHERE account_slug = ${accountSlug}
+        ${buildWhere(filter)}
     `;
     return rows;
 }
 
-export async function findOne(accountSlug: string, listSlug: string): Promise<IChecklistInstance> {
+export async function findOne(ownerId: number, listSlug: string): Promise<IChecklistInstance> {
     const [row] = await sql<IChecklistInstance[]>`
         SELECT *
         FROM checklist_latest
-        WHERE account_slug = ${accountSlug} AND list_slug = ${listSlug}
+        WHERE owner_id = ${ownerId} AND list_slug = ${listSlug}
     `;
     return row;
 }
