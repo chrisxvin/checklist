@@ -1,7 +1,7 @@
 import * as v from "valibot";
-import { error, redirect } from "@sveltejs/kit";
-import { getRequestEvent, form } from "$app/server";
-import { create } from "$lib/server/db/proc.checklist";
+import { redirect } from "@sveltejs/kit";
+import { getRequestEvent, form, command } from "$app/server";
+import { create, finalize, isValid } from "$lib/server/db/proc.checklist";
 import { generateNewSlug } from "$lib/utils/checklist";
 import { EXECUTION_MODE } from "$types/enum-defs";
 
@@ -42,3 +42,17 @@ export const createList = form(
         redirect(303, `/list/${slug}`);
     },
 );
+
+export const finalizeList = command(v.string(), async (listId) => {
+    const { locals } = getRequestEvent();
+    const v = await isValid({
+        ownerId: locals.user.uid,
+        listId,
+    });
+    if (!v) {
+        log.error("Remote::Checklist::finalizeList, invalid uid and listId");
+        throw new Error("Invalid request");
+    }
+
+    await finalize(listId);
+});

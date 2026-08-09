@@ -1,13 +1,25 @@
 <script lang="ts">
+import { finalizeList } from "$lib/remotes/proc.checklist.remote";
+
 interface IProps {
     checklist: IChecklistInstance;
     inPreview?: boolean;
 }
 let { checklist, inPreview }: IProps = $props();
+
+async function doFinalize() {
+    await finalizeList(checklist.listId);
+    window.location.reload();
+}
 </script>
 
-<!-- todo: 可以自己给分类设置颜色 -->
-<span class="badge badge-warning rounded-none">{checklist.category}</span>
+<div class="flex flex-row gap-2">
+    <!-- todo: 可以自己给分类设置颜色 -->
+    <span class="badge badge-warning rounded-none">{checklist.category}</span>
+
+    <span class="badge badge-primary rounded-none">Ver {checklist.version}</span>
+</div>
+
 <div class="flex justify-between">
     {#if inPreview}
         <a href="/list/{checklist.slug}" class="hover:link hover:link-primary" title="List">
@@ -42,7 +54,7 @@ let { checklist, inPreview }: IProps = $props();
 
 <div class="mt-6 flex gap-4">
     {#if checklist.drafting}
-        <button class="btn btn-primary">Finalize 定稿</button>
+        <button class="btn btn-primary" onclick={doFinalize}>Finalize 定稿</button>
     {:else}
         <button class="btn btn-primary">Run! 运行</button>
     {/if}
