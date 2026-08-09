@@ -1,6 +1,6 @@
 # Preflight - 数据库设计
 
-使用 PostgreSQL。所有时间以 UTC 写入 `timestamptz`。用户表统一命名为 `account`；`account`、`checklist`、`checklist_versions` 和 Run 均使用 `int4` 主键。模板步骤和 Run 执行结果均存为有序 `jsonb` 数组。
+使用 PostgreSQL。所有时间以 UTC 写入(`timestamptz`类型)。用户表命名为 `account`；`account`、`checklist`、`checklist_version` 和 Run 均使用 `int4` 主键。模板步骤和 Run 执行结果均存为有序 `jsonb` 数组。
 
 ```sql
 
@@ -23,7 +23,7 @@ CACHE 1
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     is_active bool NOT NULL DEFAULT true,
-    CHECK (slug ~ '^[A-Za-z0-9]{6,}$'),
+    CHECK (slug ~ '^[A-Za-z0-9]{3,}$'),
     CHECK (username ~ '^[A-Za-z][A-Za-z0-9\-_]{2,29}$')
 );
 
@@ -66,6 +66,7 @@ CREATE TABLE checklist (
     description varchar(255),
     category varchar(255),
     icon varchar(255),
+    execution_mode int2 NOT NULL DEFAULT 0 CHECK (execution_mode IN (0, 1, 2)),
     current_version integer NOT NULL DEFAULT 1 CHECK (current_version >= 1),
     drafting bool NOT NULL DEFAULT false,
     archived_at timestamptz,
@@ -74,13 +75,14 @@ CREATE TABLE checklist (
     UNIQUE (owner_id, slug)
 );
 
+COMMENT ON COLUMN checklist.execution_mode IS '0-free, 1-sequential, 2-strict';
+
 -- 检查单版本
 
-CREATE TABLE checklist_versions (
-    id int4 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    list_id int4 NOT NULL,
+CREATE TABLE checklist_version (
+    id int8 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    list_id int8 NOT NULL,
     version integer NOT NULL CHECK (version >= 1),
-    execution_mode int2 NOT NULL DEFAULT 0 CHECK (execution_mode IN (0, 1, 2)),
     steps jsonb NOT NULL CHECK (
         jsonb_typeof(steps) = 'array'
         AND jsonb_array_length(steps) > 0
@@ -89,14 +91,12 @@ CREATE TABLE checklist_versions (
     UNIQUE (list_id, version)
 );
 
-COMMENT ON COLUMN checklist_versions.execution_mode IS '0-free, 1-sequential, 2-strict';
-
 -- 运行记录
 
 CREATE TABLE run_instance (
     id int4 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     list_id int4 NOT NULL, -- checklist(id),
-    list_version_id int4 NOT NULL, -- checklist_versions(id),
+    list_version_id int4 NOT NULL, -- checklist_version(id),
     list_version integer NOT NULL CHECK (list_version >= 1),
     status int2 NOT NULL DEFAULT 0 CHECK(status IN (0, 1, 2, 3)),
     started_by int4 NOT NULL, -- account(uid),
@@ -118,6 +118,27 @@ CREATE TABLE run_instance (
 
 COMMENT ON COLUMN run_instance.status IS '0-not_started, 1-in_progress, 2-completed, 3-cancelled';
 
+
+-- View: 
+
+CREATE VIEW checklist_latest AS
+    SELECT list.id AS list_id,
+        list.slug,
+        list.name,
+        list.description,
+        list.category,
+        list.icon,
+        list.execution_mode,
+        list.drafting,
+        list.updated_at,
+        ver.id AS ver_id,
+        ver.version,
+        ver.steps,
+        acct.slug AS account_slug
+    FROM checklist list
+    JOIN account acct ON acct.uid = list.owner_id
+    JOIN checklist_version ver ON list.id = ver.list_id AND list.current_version = ver.version;
+
 ```
 
 # 数据逻辑
@@ -127,18 +148,18 @@ COMMENT ON COLUMN run_instance.status IS '0-not_started, 1-in_progress, 2-comple
 ### 新建
 
 1. 向 `checklist` 插入基本数据。
-2. 向 `checklist_versions` 插入版本数据。
+2. 向 `checklist_version` 插入版本数据。
 
-`checklist_versions.steps` 是模板步骤定义数组。每个元素包含 `title`、`description`、`group_name` 和 `is_skippable`。元素顺序决定显示顺序。模板更新提交完整元数据和完整步骤数组；服务端校验数组非空，再插入新的版本记录。已有版本永不更新。
+`checklist_version.steps` 是模板步骤定义数组。每个元素包含 `title`、`description`、`group_name` 和 `is_skippable`。元素顺序决定显示顺序。模板更新提交完整元数据和完整步骤数组；服务端校验数组非空，再插入新的版本记录。已有版本永不更新。
 
 ### 读取
 
-关联 `checklist.id = checklist_versions.list_id AND checklist.current_version = checklist_versions.version`，然后提取两个表的数据。
+关联 `checklist.id = checklist_version.list_id AND checklist.current_version = checklist_version.version`，然后提取两个表的数据。
 
 ### 编辑
 
-1. 从 `checklist_versions` 根据 `list_id` 和 `version` 读取最新版本，然后提取 `execution_mode`, `steps`。
-2. 在 `checklist_versions` 创建新的记录，包括 `list_id`, `version + 1`, `execution_mode`, `steps`.
+1. 从 `checklist_version` 根据 `list_id` 和 `version` 读取最新版本，然后提取 `steps`。
+2. 在 `checklist_version` 创建新的记录，包括 `list_id`, `version + 1`, `steps`.
 3. 更新 `checklist`, 写入新的版本号，以及 `updated_at`。
 
 ## 运行
@@ -147,7 +168,7 @@ COMMENT ON COLUMN run_instance.status IS '0-not_started, 1-in_progress, 2-comple
 2. 将相关信息写入 run_instance。
 3. 用户操作，并更新 run_instance。
 
-`run_instance.steps` 存储 `checklist_versions.steps` 的扩展，新增 `checked`、`resolved_at`、`skip_reason` 等字段。其中 `checked` 字段的含义如下：
+`run_instance.steps` 存储 `checklist_version.steps` 的扩展，新增 `checked`、`resolved_at`、`skip_reason` 等字段。其中 `checked` 字段的含义如下：
 
     - null: 步骤被跳过
     - true: 成功
