@@ -7,7 +7,7 @@ import { redirect } from "@sveltejs/kit";
 import { default as detectMobile } from "ismobilejs";
 import { DEPLOY_URL } from "$env/static/private";
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/session";
-import { sql } from "$lib/server/db";
+import { account } from "$lib/server/db";
 
 export const init: ServerInit = () => {
     // connect();
@@ -56,7 +56,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     // 没有 session？
     if (token == null) {
         event.locals.session = undefined;
-        event.locals.user = undefined;
+        event.locals.user = undefined as any;
 
         // 访问的是不需要登录的页面
         if (event.url.pathname == "/"
@@ -79,20 +79,15 @@ export const handle: Handle = async ({ event, resolve }) => {
         setSessionTokenCookie(event.cookies, token, session.expiresAt);
     }
 
-    const rows = await sql<Partial<IAccount>[]>`
-        SELECT username, email, display_name, picture, is_active
-        FROM account
-        WHERE uid = ${session.uid}
-    `;
-    const account = rows[0];
-    if (!account) {
+    const acct = await account.findAccount({ uid: session.uid });
+    if (!acct) {
         return redirect(302, "/auth/login");
     }
 
-    if (!account.isActive) {
+    if (!acct.isActive) {
         deleteSessionTokenCookie(event.cookies);
         event.locals.session = undefined;
-        event.locals.user = undefined;
+        event.locals.user = undefined as any;
         if (isAuthRoute || isAuthApiRoute) {
             return resolve(event);
         }
@@ -100,7 +95,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
 
     event.locals.session = session;
-    event.locals.user = account;
+    event.locals.user = acct;
 
     return resolve(event);
 };
