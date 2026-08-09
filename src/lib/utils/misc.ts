@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { hashLikeRandomId } from "./crypto";
 
 export function emailToUsername(email: string) {
     // 1. 只取 @ 前面的部分
@@ -13,7 +13,7 @@ export function emailToUsername(email: string) {
     }
 
     // 4. 截断到最多 24 位
-    s = s.slice(0, 24) + nanoid(6);
+    s = s.slice(0, 24) + hashLikeRandomId(6);
 
     // 6. 最终校验
     if (!/^[A-Za-z][A-Za-z0-9\-_]{2,29}$/.test(s)) {

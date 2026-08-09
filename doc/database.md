@@ -122,8 +122,9 @@ COMMENT ON COLUMN run_instance.status IS '0-not_started, 1-in_progress, 2-comple
 -- View: 
 
 CREATE VIEW checklist_latest AS
-    SELECT list.id AS list_id,
-        list.slug,
+    SELECT 
+        list.id AS list_id,
+        list.slug as list_slug,
         list.name,
         list.description,
         list.category,

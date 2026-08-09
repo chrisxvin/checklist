@@ -42,10 +42,6 @@ export default defineConfig({
         }),
     ],
     build: {
-        rollupOptions: {
-            plugins: [
-            ],
-        },
     },
     test: {
         include: ["src/**/*.{test,spec}.{js,ts}"],

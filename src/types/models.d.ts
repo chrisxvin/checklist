@@ -1,33 +1,14 @@
-declare global {
-    interface ITemplate {
-        /**
-         * 对应文档的 _id.
-         */
-        id: string;
-        name: string;
-        description?: string;
-        owner: number;
-        public: boolean;
-        items: ITemplateItem[];
-    }
-
-    interface ITemplateItem {
-        /** @deprecated */
-        checked: boolean;
-        content: string;
-        shouldBe?: string;
-        comment?: string;
-    }
-
-    interface IInstance {
-        /**
-         * 对应文档的 _id.
-         */
-        id: string;
-        // Template Id
-        tid: string;
-        state: boolean[];
-    }
+interface IChecklistInstance {
+    listId: string;
+    listSlug: string;
+    name: string;
+    description?: string;
+    category?: string;
+    icon?: string;
+    drafting: boolean;
+    updatedAt: Date;
+    verId: string;
+    version: number;
+    executionMode: EXECUTION_MODE;
+    steps: IStep[];
 }
-
-export { };

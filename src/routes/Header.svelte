@@ -5,13 +5,19 @@ let { logined, user }: LayoutProps["data"] = $props();
 </script>
 
 <header class="flex items-center justify-between p-2">
-    <strong class="text-2xl">Preflight</strong>
+    {#if logined && user}
+        <a href="/u/{user.slug}">
+            <strong class="text-2xl">Preflight</strong>
+        </a>
+    {:else}
+        <strong class="text-2xl">Preflight</strong>
+    {/if}
     <span>&nbsp;</span>
 
     <nav>
         {#if logined && user}
             <div class="avatar">
-                <div class="w-12 mask mask-squircle">
+                <div class="mask mask-squircle w-12">
                     <img src={user.picture} alt="Avatar" />
                 </div>
             </div>

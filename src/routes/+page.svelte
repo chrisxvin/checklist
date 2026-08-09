@@ -10,7 +10,9 @@ let { data }: PageProps = $props();
 
 <section class="m-8">
     {#if data.logined}
-        <h1>Checklist</h1>
+        <a class="link link-primary" href="/u/{data.user.username}/">
+            <h1>Checklist</h1>
+        </a>
     {:else}
         <a class="link link-primary" href="/auth/login">Login</a>
     {/if}
