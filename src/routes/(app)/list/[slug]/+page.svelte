@@ -7,4 +7,6 @@ let { data }: PageProps = $props();
 let { list } = $derived(data);
 </script>
 
-<Checklist checklist={list} />
+<div class="m-8">
+    <Checklist checklist={list} />
+</div>

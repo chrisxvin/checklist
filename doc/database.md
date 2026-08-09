@@ -64,7 +64,7 @@ CREATE TABLE checklist (
     icon varchar(255),
     execution_mode int2 NOT NULL DEFAULT 0 CHECK (execution_mode IN (0, 1, 2)),
     current_version integer NOT NULL DEFAULT 1 CHECK (current_version >= 1),
-    drafting bool NOT NULL DEFAULT false,
+    drafting bool NOT NULL DEFAULT true,
     archived_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
