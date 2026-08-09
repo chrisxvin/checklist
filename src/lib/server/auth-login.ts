@@ -11,7 +11,6 @@ type LoginAttempt = {
 
 type LoginAttemptResult = {
     success: boolean;
-    slug?: string;
     message?: string;
 };
 
@@ -63,6 +62,5 @@ export async function loginWithPasshash({ username, passhash, cookies }: LoginAt
 
     return {
         success: true,
-        slug: accountInDB.slug,
     };
 }

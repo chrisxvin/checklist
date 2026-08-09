@@ -35,12 +35,11 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
         googleId: claims.sub,
     });
 
-    let slug: string;
     if (existingUser == null) {
         // const requireManualActivation = await shouldRequireManualActivation();
 
         // add new user
-        const newAccount = await account.createAccountFromGoogle(claims);
+        const newUid = await account.createAccountFromGoogle(claims);
 
         /*
         if (requireManualActivation) {
@@ -49,7 +48,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
         */
 
         const sessionToken = generateSessionToken();
-        const session = await createSession(sessionToken, newAccount.uid);
+        const session = await createSession(sessionToken, newUid);
         setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
         /*
         await db.account().updateOne(
@@ -62,8 +61,6 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
             },
         );
         */
-
-        slug = newAccount.slug;
     } else {
         if (existingUser.isActive === false) {
             redirect(303, "/auth/login?error=account_inactive");
@@ -83,9 +80,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
             },
         );
         */
-
-        slug = existingUser.slug;
     }
 
-    redirect(303, `/u/${slug}`);
+    redirect(303, `/home`);
 };

@@ -39,6 +39,6 @@ export const createList = form(
         }, steps);
 
         // Redirect to the newly created list
-        redirect(303, `/u/${locals.user.slug}/list/${slug}`);
+        redirect(303, `/list/${slug}`);
     },
 );

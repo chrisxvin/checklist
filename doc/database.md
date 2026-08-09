@@ -13,7 +13,6 @@ MINVALUE  1000
 START 1000
 CACHE 1
 ),
-    slug varchar(255) NOT NULL UNIQUE,
     username varchar(255) NOT NULL UNIQUE,
     passhash varchar(255),
     email varchar(255) NOT NULL,
@@ -23,13 +22,11 @@ CACHE 1
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     is_active bool NOT NULL DEFAULT true,
-    CHECK (slug ~ '^[A-Za-z0-9]{3,}$'),
     CHECK (username ~ '^[A-Za-z][A-Za-z0-9\-_]{2,29}$')
 );
 
 ALTER TABLE account OWNER TO preflight;
 
-CREATE UNIQUE INDEX idx_account_slug ON account (slug);
 CREATE UNIQUE INDEX idx_account_username ON account (username);
 CREATE UNIQUE INDEX idx_account_email ON account (email);
 
@@ -37,7 +34,6 @@ COMMENT ON COLUMN account.uid IS '主键';
 COMMENT ON COLUMN account.display_name IS '用户昵称';
 COMMENT ON COLUMN account.google_id IS '用 Google 登录绑定的 ID';
 COMMENT ON COLUMN account.picture IS '头像URL';
-COMMENT ON COLUMN account.slug IS '唯一标识符（URL友好）';
 
 -- 登录会话
 
@@ -124,7 +120,7 @@ COMMENT ON COLUMN run_instance.status IS '0-not_started, 1-in_progress, 2-comple
 CREATE VIEW checklist_latest AS
     SELECT 
         list.id AS list_id,
-        list.slug as list_slug,
+        list.slug,
         list.name,
         list.description,
         list.category,
@@ -135,7 +131,7 @@ CREATE VIEW checklist_latest AS
         ver.id AS ver_id,
         ver.version,
         ver.steps,
-        acct.slug AS account_slug
+        acct.uid AS owner_id
     FROM checklist list
     JOIN account acct ON acct.uid = list.owner_id
     JOIN checklist_version ver ON list.id = ver.list_id AND list.current_version = ver.version;

@@ -6,7 +6,7 @@ let { logined, user }: LayoutProps["data"] = $props();
 
 <header class="flex items-center justify-between p-2">
     {#if logined && user}
-        <a href="/u/{user.slug}">
+        <a href="/home">
             <strong class="text-2xl">Preflight</strong>
         </a>
     {:else}
