@@ -13,11 +13,17 @@ async function doFinalize() {
 }
 </script>
 
-<div class="flex flex-row gap-2">
+<div class="flex flex-row gap-1">
     <!-- todo: 可以自己给分类设置颜色 -->
     <span class="badge badge-warning rounded-none">{checklist.category}</span>
 
+    <!-- 版本 -->
     <span class="badge badge-primary rounded-none">Ver {checklist.version}</span>
+
+    <!-- 草稿 -->
+    {#if checklist.drafting}
+        <span class="badge badge-accent rounded-none">草稿</span>
+    {/if}
 </div>
 
 <div class="flex justify-between">
@@ -28,13 +34,12 @@ async function doFinalize() {
     {:else}
         <h2 class="text-3xl font-bold">{checklist.name}</h2>
     {/if}
-    {#if checklist.drafting}
-        <span class="badge badge-sm badge-accent">草稿</span>
-    {/if}
 </div>
-<p>{checklist.description}</p>
+{#if checklist.description}
+    <p>{checklist.description}</p>
+{/if}
 
-<ul class="mt-6 flex flex-col gap-2 text-xs">
+<ul class="mt-2 flex flex-col gap-2 text-xs">
     {#each checklist.steps as step}
         <li>
             <svg
@@ -47,7 +52,7 @@ async function doFinalize() {
                     fill="currentColor"
                     d="M12 20a8 8 0 0 1-8-8a8 8 0 0 1 8-8a8 8 0 0 1 8 8a8 8 0 0 1-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2" />
             </svg>
-            <span>{step.content}</span>
+            <span class="text-lg">{step.content}</span>
         </li>
     {/each}
 </ul>
