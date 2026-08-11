@@ -18,7 +18,7 @@ let { data, params }: PageProps = $props();
 
 <div class="fab">
     <button class="btn btn-lg btn-circle btn-primary">
-        <a href="/list/add" title="Add new list">
+        <a href="/list/new" title="Add new list">
             <svg
                 aria-label="New"
                 xmlns="http://www.w3.org/2000/svg"

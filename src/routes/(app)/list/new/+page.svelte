@@ -1,12 +1,12 @@
 <script lang="ts">
 import type { PageProps } from "./$types";
+
 import { createList } from "$lib/remotes/proc.checklist.remote";
 import { EXECUTION_MODE, EXECUTION_MODE_MAP } from "$types/enum-defs";
 
 let { data }: PageProps = $props();
 
 let steps: IStep[] = $state([]);
-let stepsStr = $derived(JSON.stringify(steps));
 
 function saveList() {}
 
