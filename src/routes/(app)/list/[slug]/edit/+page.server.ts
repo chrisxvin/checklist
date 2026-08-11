@@ -1,27 +1,17 @@
-import type { Actions, PageServerLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 
-export const load = (async () => {
-    return {};
+import { error } from "@sveltejs/kit";
+import { checklist } from "$lib/server/db";
+
+export const load = (async ({ locals, params }) => {
+    const list = await checklist.findForEdit({
+        ownerId: locals.user.uid,
+        slug: params.slug,
+    });
+    if (!list) {
+        error(404, "模板不存在");
+    }
+    return {
+        list,
+    };
 }) satisfies PageServerLoad;
-
-export const actions = {
-    // default action is SAVE
-    default: async ({ cookies, request }) => {
-        const formData = await request.formData();
-        const username = formData.get("username") as string;
-        const passhash = formData.get("passhash") as string;
-
-        /*
-        const r = await loginWithPasshash({
-            username,
-            passhash,
-            cookies,
-        });
-        if (r.success) {
-            redirect(303, `/home`);
-        } else {
-            return r;
-        }
-        */
-    },
-} satisfies Actions;

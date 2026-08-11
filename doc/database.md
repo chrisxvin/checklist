@@ -126,7 +126,10 @@ CREATE VIEW checklist_latest AS
         list.category,
         list.icon,
         list.execution_mode,
+        list.current_version,
         list.drafting,
+        list.archived_at,
+        list.created_at,
         list.updated_at,
         ver.id AS ver_id,
         ver.version,
@@ -147,17 +150,22 @@ CREATE VIEW checklist_latest AS
 1. 向 `checklist` 插入基本数据。
 2. 向 `checklist_version` 插入版本数据。
 
-`checklist_version.steps` 是模板步骤定义数组。每个元素包含 `title`、`description`、`group_name` 和 `is_skippable`。元素顺序决定显示顺序。模板更新提交完整元数据和完整步骤数组；服务端校验数组非空，再插入新的版本记录。已有版本永不更新。
+`checklist_version.steps` 是模板步骤定义数组。每个元素包含 `content`（必填）、`description`（可选）、`groupName`（可选，仅视觉分组）和 `isSkippable`（默认 `true`）。元素顺序决定显示顺序。模板更新提交完整元数据和完整步骤数组；服务端校验数组非空。编辑遵循"草稿/定稿"规则（见下），已定稿的版本绝不原地更新。
 
 ### 读取
 
 关联 `checklist.id = checklist_version.list_id AND checklist.current_version = checklist_version.version`，然后提取两个表的数据。
 
-### 编辑
+### 编辑（草稿 / 定稿）
 
-1. 从 `checklist_version` 根据 `list_id` 和 `version` 读取最新版本，然后提取 `steps`。
-2. 在 `checklist_version` 创建新的记录，包括 `list_id`, `version + 1`, `steps`.
-3. 更新 `checklist`, 写入新的版本号，以及 `updated_at`。
+模板采用两态流程：编辑即进入草稿态（`drafting = true`），草稿期内反复保存都原地更新当前版本，不产生新版本；用户"定稿"（`drafting = false`）后版本冻结，后续编辑才会产生新版本。
+
+1. 从 `checklist_version` 按 `list_id` 与 `checklist.current_version` 读取最新版本，提取 `steps`。
+2. 若模板已定稿（`drafting = false`）：复制当前版本 `steps` 插入新记录（`version + 1`），并更新 `checklist` 的 `current_version`、置 `drafting = true`，进入草稿态。
+3. 若已在草稿态（`drafting = true`）：原地更新当前版本的 `steps` 与 `checklist` 的元数据（含 `updated_at = now()`），不新增版本。
+4. 定稿：仅更新 `checklist.drafting = false`，固化当前版本。
+
+已定稿的版本绝不原地更新；草稿版本可以被反复修改。
 
 ## 运行
 
@@ -177,6 +185,6 @@ CREATE VIEW checklist_latest AS
 
 ## 用户
 
-`account` 保存用户数据。
+`account` 保存用户数据。登录支持两种方式：Google OAuth（`google_id` 绑定）与用户名密码（`passhash` 保存客户端 SHA-256 后的 64 位 hex 哈希，服务端只做哈希比对，不接触明文密码）。
 
 `session` 允许同一个 `uid` 同时存在多条记录，以支持多设备登录。所有“创建 Run + 复制最新版本步骤”、“更新 Run 步骤结果 + 校验执行模式”和“结束 Run + 校验完成条件”必须在一个数据库事务中完成。

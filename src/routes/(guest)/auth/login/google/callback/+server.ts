@@ -82,5 +82,5 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
         */
     }
 
-    redirect(303, `/home`);
+    redirect(303, `/list`);
 };

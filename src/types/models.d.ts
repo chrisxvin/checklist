@@ -6,6 +6,8 @@ interface IChecklistInstance {
     category?: string;
     icon?: string;
     drafting: boolean;
+    archivedAt: Date | null;
+    createdAt: Date;
     updatedAt: Date;
     verId: string;
     version: number;

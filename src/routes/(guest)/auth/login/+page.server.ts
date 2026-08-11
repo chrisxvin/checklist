@@ -45,7 +45,7 @@ export const actions = {
             cookies,
         });
         if (r.success) {
-            redirect(303, `/home`);
+            redirect(303, `/list`);
         } else {
             return r;
         }

@@ -1,12 +1,10 @@
 import type { PageServerLoad } from "./$types";
 
-import { error } from "@sveltejs/kit";
-import { sql } from "$lib/server/db";
+import { redirect } from "@sveltejs/kit";
 
-export const load = (async ({ params,  }) => {
-    const rows = sql<ISession[]>`
-        SELECT *
-        FROM session
-        WHERE 
-    `;
+export const load = (async ({ locals }) => {
+    if (locals.session != null) {
+        redirect(302, "/list");
+    }
+    return {};
 }) satisfies PageServerLoad;

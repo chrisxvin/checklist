@@ -1,5 +1,8 @@
-onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
 
 overrides:
-#  "@cyysummer/core@*": "link:../../Libs/Web/starlex/packages/core"
+  "@buxton/auth-google@*": "link:../../Libs/Web/starlex/packages/auth-google"
+  "@buxton/core@*": "link:../../Libs/Web/starlex/packages/core"
